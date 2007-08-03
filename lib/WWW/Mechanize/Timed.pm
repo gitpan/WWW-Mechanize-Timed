@@ -1,38 +1,61 @@
 package WWW::Mechanize::Timed;
-
 use strict;
 use warnings FATAL => 'all';
-our $VERSION = '0.42';
-
 use base qw( WWW::Mechanize );
 use LWPx::TimedHTTP qw(:autoinstall);
+use Time::HiRes;
+our $VERSION = '0.43';
 
 sub new {
     my $class = shift;
-    my %args = @_;
-    my $self = $class->SUPER::new( %args );
+    my %args  = @_;
+    my $self  = $class->SUPER::new(%args);
+    $self->{client_elapsed_time} = 0;
     return $self;
 }
 
+sub get {
+    my $self     = shift;
+    my $start    = Time::HiRes::gettimeofday();
+    my $response = $self->SUPER::get(@_);
+    $self->{client_elapsed_time} = Time::HiRes::gettimeofday() - $start;
+    return $response;
+}
+
+sub client_elapsed_time {
+    my $self = shift;
+    return $self->{client_elapsed_time};
+}
+
 sub client_request_connect_time {
-  my $self = shift;
-  return $self->response->header('Client-Request-Connect-Time');
+    my $self = shift;
+    return $self->response->header('Client-Request-Connect-Time');
 }
 
 sub client_request_transmit_time {
-  my $self = shift;
-  return $self->response->header('Client-Request-Transmit-Time');
+    my $self = shift;
+    return $self->response->header('Client-Request-Transmit-Time');
 }
 
 sub client_response_server_time {
-  my $self = shift;
-  return $self->response->header('Client-Response-Server-Time');
+    my $self = shift;
+    return $self->response->header('Client-Response-Server-Time');
 }
 
 sub client_response_receive_time {
-  my $self = shift;
-  return $self->response->header('Client-Response-Receive-Time');
+    my $self = shift;
+    return $self->response->header('Client-Response-Receive-Time');
 }
+
+sub client_total_time {
+    my $self = shift;
+    return $self->client_request_connect_time
+        + $self->client_request_transmit_time
+        + $self->client_response_server_time
+        + $self->client_response_receive_time;
+}
+
+1;
 
 __END__
 
@@ -45,7 +68,8 @@ WWW::Mechanize::Timed - Time Mechanize requests
   use WWW::Mechanize::Timed;
   my $ua = WWW::Mechanize::Timed->new();
   $ua->get($url);
-  print "Total time: " . $ua->client_response_receive_time . "\n";
+  print "Total time: " . $ua->client_total_time . "\n";
+  print "Elapsed time: " . $ua->client_elapsed_time . "\n";
 
 =head1 DESCRIPTION
 
@@ -83,6 +107,21 @@ Time it took to respond to the request.
 =head2 client_response_receive_time
 
 Time it took to get the data back.
+
+=head2 client_total_time
+
+Total time taken for each of the 4 stages above.
+
+=head2 client_elapsed_time
+
+Total time taken to make the WWW::Mechanize::get request, as 
+perceived by the calling program.
+
+=head2 get
+
+Use this method to request a page:
+
+  $ua->get($url);
 
 =head1 THANKS
 

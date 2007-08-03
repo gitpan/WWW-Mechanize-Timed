@@ -1,16 +1,26 @@
+#!perl
 use strict;
-use Test::More tests => 6;
+use warnings;
+use lib 'lib';
+use Test::More tests => 9;
 use_ok('WWW::Mechanize::Timed');
 
 my $ua = WWW::Mechanize::Timed->new();
-isa_ok($ua, 'WWW::Mechanize::Timed');
+isa_ok( $ua, 'WWW::Mechanize::Timed' );
+cmp_ok( $ua->client_elapsed_time, '==', 0, "Elapsed timer not started" );
 
 $ua->get("http://www.astray.com/");
 
-ok($ua->client_request_connect_time);
-ok($ua->client_request_transmit_time);
-ok($ua->client_response_server_time);
-ok($ua->client_response_receive_time);
-
-
+my ( $a, $b, $c, $d );
+ok( $a = $ua->client_request_connect_time );
+ok( $b = $ua->client_request_transmit_time );
+ok( $c = $ua->client_response_server_time );
+ok( $d = $ua->client_response_receive_time );
+cmp_ok(
+    $ua->client_total_time, '==',
+    $a + $b + $c + $d,
+    "client_total_time correct"
+);
+cmp_ok( $ua->client_elapsed_time, '>', $ua->client_total_time,
+    "client_elapsed_time > client_total_time" );
 
