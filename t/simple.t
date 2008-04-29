@@ -12,10 +12,10 @@ cmp_ok( $ua->client_elapsed_time, '==', 0, "Elapsed timer not started" );
 $ua->get("http://www.astray.com/");
 
 my ( $a, $b, $c, $d );
-ok( $a = $ua->client_request_connect_time );
-ok( $b = $ua->client_request_transmit_time );
-ok( $c = $ua->client_response_server_time );
-ok( $d = $ua->client_response_receive_time );
+ok( defined( $a = $ua->client_request_connect_time ) );
+ok( defined( $b = $ua->client_request_transmit_time ) );
+ok( defined( $c = $ua->client_response_server_time ) );
+ok( defined( $d = $ua->client_response_receive_time ) );
 cmp_ok(
     $ua->client_total_time, '==',
     $a + $b + $c + $d,

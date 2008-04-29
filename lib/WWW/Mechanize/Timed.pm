@@ -4,7 +4,7 @@ use warnings FATAL => 'all';
 use base qw( WWW::Mechanize );
 use LWPx::TimedHTTP qw(:autoinstall);
 use Time::HiRes;
-our $VERSION = '0.43';
+our $VERSION = '0.44';
 
 sub new {
     my $class = shift;
